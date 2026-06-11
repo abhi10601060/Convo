@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "Convo"
 include(":app")
 include(":core:ui")
+include(":contacts")
