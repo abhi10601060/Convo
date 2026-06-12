@@ -3,6 +3,7 @@ package com.app.contacts.di
 import android.content.Context
 import com.app.contacts.data.repo.ContactRepoImpl
 import com.app.contacts.domain.contract.ContactsRepo
+import com.app.network.api.ContactsService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,7 +18,10 @@ class ContactsAppModule {
 
     @Provides
     @Singleton
-    fun providesSingletonContactsRepo(@ApplicationContext context: Context) : ContactsRepo{
-        return ContactRepoImpl(context)
+    fun providesSingletonContactsRepo(
+        @ApplicationContext context: Context,
+        contactsService: ContactsService
+    ) : ContactsRepo{
+        return ContactRepoImpl(context, contactsService)
     }
 }

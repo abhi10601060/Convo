@@ -7,20 +7,19 @@ import android.provider.ContactsContract
 import android.util.Log
 import com.app.contacts.data.model.Contact
 import com.app.contacts.domain.contract.ContactsRepo
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.app.network.api.ContactsService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 class ContactRepoImpl(
-     private val context: Context
-) : ContactsRepo{
+    private val context: Context,
+    private val contactsService: ContactsService
+) : ContactsRepo {
     override suspend fun getLocalContacts(): List<Contact> = withContext(Dispatchers.IO) {
         val contacts = mutableListOf<Contact>()
         val contentResolver: ContentResolver = context.contentResolver
 
-        Log.d("ContactRepoImpl", "Querying contacts...")
+        Log.d("ContactRepoImpl", "Querying local contacts...")
 
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -30,16 +29,11 @@ class ContactRepoImpl(
             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
         )
 
-        Log.d("ContactRepoImpl", "Cursor is null: ${cursor == null}")
-
         cursor?.use {
-            Log.d("ContactRepoImpl", "Cursor count: ${it.count}")
-
             val idIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
             val nameIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
             val numberIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-            val photoIndex =
-                it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI)
+            val photoIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI)
 
             while (it.moveToNext()) {
                 val id = if (idIndex != -1) it.getString(idIndex) else ""
@@ -51,8 +45,19 @@ class ContactRepoImpl(
                 contacts.add(Contact(id, name, number, photoUri))
             }
         }
-        val result = contacts.distinctBy { it.phoneNumber }
-        Log.d("ContactRepoImpl", "Returning ${result.size} distinct contacts")
-        result
+        contacts.distinctBy { it.phoneNumber }
+    }
+
+    override suspend fun getRemoteContacts(limit: Int, skip: Int): List<Contact> = withContext(Dispatchers.IO) {
+        Log.d("ContactRepoImpl", "Fetching remote contacts (limit=$limit, skip=$skip)...")
+        val response = contactsService.getContacts(limit, skip)
+        response.users.map { user ->
+            Contact(
+                id = user.id.toString(),
+                displayName = "${user.firstName} ${user.lastName}",
+                phoneNumber = user.phone,
+                photoUri = Uri.parse(user.image)
+            )
+        }
     }
 }
