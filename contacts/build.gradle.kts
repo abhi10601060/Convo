@@ -67,6 +67,7 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
 
     implementation(project(":core:ui"))
+    implementation(project(":core:network"))
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
