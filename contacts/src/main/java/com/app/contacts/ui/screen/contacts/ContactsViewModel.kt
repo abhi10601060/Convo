@@ -7,6 +7,7 @@ import com.app.contacts.domain.usecase.GetLocalContactsUseCase
 import com.app.contacts.domain.usecase.GetRemoteContactsUseCase
 import com.app.contacts.ui.util.PermissionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +32,7 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun loadLocalContacts() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO){
             Log.d("ContactsViewModel", "loadLocalContacts called")
             _uiState.update {
                 it.copy(localContactsUiState = ContactsUiState.Loading)
@@ -52,7 +53,7 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun loadRemoteContacts() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Log.d("ContactsViewModel", "loadRemoteContacts called")
             _uiState.update {
                 it.copy(remoteContactsUiState = ContactsUiState.Loading)
