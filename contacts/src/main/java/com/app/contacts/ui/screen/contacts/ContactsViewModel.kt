@@ -3,11 +3,15 @@ package com.app.contacts.ui.screen.contacts
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.domain.usecase.GetLocalContactsUseCase
 import com.app.contacts.domain.usecase.GetRemoteContactsUseCase
 import com.app.contacts.ui.util.PermissionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,9 +25,12 @@ class ContactsViewModel @Inject constructor(
     private val getRemoteContactsUseCase: GetRemoteContactsUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ContactsScreenUiState>(ContactsScreenUiState(localContactsUiState = ContactsUiState.Idle, remoteContactsUiState = ContactsUiState.Idle, permissionStatus = PermissionStatus.IDLE))
+    private val _uiState = MutableStateFlow<ContactsScreenUiState>(ContactsScreenUiState(localContactsUiState = ContactsUiState.Idle, permissionStatus = PermissionStatus.IDLE))
     val uiState: StateFlow<ContactsScreenUiState> = _uiState.asStateFlow()
     var hasAskedBeforeContactPermission = false;
+
+    val remoteContacts: Flow<PagingData<ContactDomain>> = getRemoteContactsUseCase(pageSize = 10)
+        .cachedIn(viewModelScope)
 
     fun changeLocalContactsPermissionStatus(permissionStatus: PermissionStatus){
         _uiState.update {
@@ -53,23 +60,7 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun loadRemoteContacts() {
-        viewModelScope.launch(Dispatchers.IO) {
-            Log.d("ContactsViewModel", "loadRemoteContacts called")
-            _uiState.update {
-                it.copy(remoteContactsUiState = ContactsUiState.Loading)
-            }
-            try {
-                val contacts = getRemoteContactsUseCase.invoke()
-                Log.d("ContactsViewModel", "Loaded ${contacts.size} remote contacts")
-                _uiState.update {
-                    it.copy(remoteContactsUiState = ContactsUiState.Success(contacts))
-                }
-            } catch (e: Exception) {
-                Log.e("ContactsViewModel", "Error loading remote contacts", e)
-                _uiState.update {
-                    it.copy(remoteContactsUiState = ContactsUiState.Error(e.message ?: "Unknown error"))
-                }
-            }
-        }
+        // Paging handles loading, we don't need this manual load anymore
+        // unless we want to trigger a refresh
     }
 }

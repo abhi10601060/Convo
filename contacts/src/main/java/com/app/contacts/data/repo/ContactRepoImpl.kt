@@ -5,10 +5,15 @@ import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.app.contacts.data.model.Contact
 import com.app.contacts.domain.contract.ContactsRepo
+import com.app.contacts.paging.remote_contacts.RemoteContactsPagingSource
 import com.app.network.api.ContactsService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class ContactRepoImpl(
@@ -59,5 +64,15 @@ class ContactRepoImpl(
                 photoUri = Uri.parse(user.image)
             )
         }
+    }
+
+    override fun getRemoteContactsPaged(pageSize: Int): Flow<PagingData<Contact>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { RemoteContactsPagingSource(contactsService) }
+        ).flow
     }
 }
