@@ -1,5 +1,6 @@
 package com.app.convo.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -109,13 +110,12 @@ fun AppScreen() {
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
-//                when (currentScreen) {
-//                    ScreenRoute.Contacts -> ContactsScreen()
-//                    ScreenRoute.CallLog -> CallLogScreen()
-//                    ScreenRoute.Messages -> SmsScreen()
-//                }
                 NavHost(navController = navController, startDestination = MainNavGraphRoute){
                     mainNavGraph(navController = navController)
+                }
+
+                BackHandler(enabled = drawerState.isOpen) {
+                    scope.launch { drawerState.close() }
                 }
             }
         }
