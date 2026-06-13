@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -107,9 +108,8 @@ fun ContactsScreen(
     LaunchedEffect(selectedTabIndex) {
         if (selectedTabIndex == 0 && uiState.permissionStatus == PermissionStatus.SHOW_FIRST_TIME) {
             launcher.launch(Manifest.permission.READ_CONTACTS)
-        }
-        else{
-            if (uiState.remoteContactsUiState is ContactsUiState.Idle) viewModel.loadRemoteContacts()
+        } else if (selectedTabIndex == 1) {
+            viewModel.loadRemoteContacts()
         }
     }
 
@@ -156,3 +156,10 @@ private fun Context.findActivity(): Activity? {
     return null
 }
 
+@Preview
+@Composable
+private fun ContactsScreenPrev() {
+    ConvoTheme {
+        ContactsScreen()
+    }
+}

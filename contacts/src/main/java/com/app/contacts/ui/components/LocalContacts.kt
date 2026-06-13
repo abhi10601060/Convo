@@ -28,13 +28,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.contacts.domain.model.ContactDomain
-import com.app.contacts.ui.screen.contacts.ContactsUiState
+import com.app.contacts.ui.screen.contacts.LocalContactsUiState
 import com.app.contacts.ui.util.PermissionStatus
 
 @Composable
 fun LocalContacts(
     modifier: Modifier = Modifier,
-    uiState: ContactsUiState,
+    uiState: LocalContactsUiState,
     permissionStatus: PermissionStatus,
     onPermissionGrant: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -55,12 +55,12 @@ fun LocalContacts(
             )
         } else {
             when (val state = uiState) {
-                is ContactsUiState.Loading -> {
+                is LocalContactsUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
-                is ContactsUiState.Success -> {
+                is LocalContactsUiState.Success -> {
                     if (state.contacts.isEmpty()) {
                         EmptyContactsView()
                     } else {
@@ -70,7 +70,7 @@ fun LocalContacts(
                         )
                     }
                 }
-                is ContactsUiState.Error -> {
+                is LocalContactsUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = state.message,
@@ -80,7 +80,7 @@ fun LocalContacts(
                         )
                     }
                 }
-                is ContactsUiState.Idle -> {}
+                is LocalContactsUiState.Idle -> {}
             }
         }
     }
