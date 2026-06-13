@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.app.contacts.ui.screen.contacts.ContactsScreen
 import com.app.sms.ui.screen.SmsScreen
+import com.app.call_log.ui.screen.CallLogScreen
 import com.app.ui.components.ConvoTabs
 import com.app.ui.theme.ConvoTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,17 +31,17 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {
                         ConvoTabs(
-                            titles = listOf("Contacts", "SMS"),
+                            titles = listOf("Contacts", "SMS", "Calls"),
                             selectedIndex = selectedTabIndex,
                             onTabSelected = { selectedTabIndex = it }
                         )
                     }
                 ) { padding ->
                     Box(modifier = Modifier.padding(padding)) {
-                        if (selectedTabIndex == 0) {
-                            ContactsScreen()
-                        } else {
-                            SmsScreen()
+                        when (selectedTabIndex) {
+                            0 -> ContactsScreen()
+                            1 -> SmsScreen()
+                            2 -> CallLogScreen()
                         }
                     }
                 }
