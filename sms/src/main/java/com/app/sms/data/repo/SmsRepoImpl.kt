@@ -2,6 +2,7 @@ package com.app.sms.data.repo
 
 import android.content.Context
 import android.provider.Telephony
+import com.app.sms.data.model.Sms
 import com.app.sms.domain.contract.SmsRepo
 import com.app.sms.domain.model.SmsDomain
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,8 +16,8 @@ class SmsRepoImpl(
     private val context: Context
 ) : SmsRepo {
 
-    override fun getSmsMessages(): Flow<List<SmsDomain>> = flow {
-        val smsList = mutableListOf<SmsDomain>()
+    override fun getSmsMessages(): Flow<List<Sms>> = flow {
+        val smsList = mutableListOf<Sms>()
         val cursor = context.contentResolver.query(
             Telephony.Sms.CONTENT_URI,
             arrayOf(
@@ -40,7 +41,7 @@ class SmsRepoImpl(
 
             while (it.moveToNext()) {
                 smsList.add(
-                    SmsDomain(
+                    Sms(
                         id = it.getString(idIndex),
                         address = it.getString(addressIndex) ?: "Unknown",
                         body = it.getString(bodyIndex) ?: "",
