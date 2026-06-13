@@ -70,7 +70,9 @@ class ContactRepoImpl(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = false,
+                prefetchDistance = 2,
+                initialLoadSize = 10
             ),
             pagingSourceFactory = { RemoteContactsPagingSource(contactsService) }
         ).flow
