@@ -13,15 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.app.call_log.ui.screen.CallLogScreen
-import com.app.contacts.ui.screen.contacts.ContactsScreen
-import com.app.sms.ui.screen.SmsScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.app.convo.ui.navigation.MainNavGraphRoute
+import com.app.convo.ui.navigation.ScreenRoute
+import com.app.convo.ui.navigation.mainNavGraph
 import kotlinx.coroutines.launch
 
-enum class Screen(val title: String, val icon: ImageVector) {
-    Contacts("Contacts", Icons.Default.Contacts),
-    CallLog("Call Log", Icons.Default.Call),
-    Messages("Messages", Icons.Default.Sms)
+enum class Screen(val title: String, val icon: ImageVector, val screenRoute: ScreenRoute) {
+    Contacts("Contacts", Icons.Default.Contacts, ScreenRoute.Contacts),
+    CallLog("Call Log", Icons.Default.Call, ScreenRoute.CallLogs),
+    Messages("Messages", Icons.Default.Sms, ScreenRoute.Messages)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,6 +32,12 @@ fun AppScreen() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var currentScreen by rememberSaveable { mutableStateOf(Screen.Contacts) }
+
+    val navController = rememberNavController()
+
+    LaunchedEffect(currentScreen) {
+        navController.navigate(currentScreen.screenRoute)
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -101,10 +109,13 @@ fun AppScreen() {
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                when (currentScreen) {
-                    Screen.Contacts -> ContactsScreen()
-                    Screen.CallLog -> CallLogScreen()
-                    Screen.Messages -> SmsScreen()
+//                when (currentScreen) {
+//                    ScreenRoute.Contacts -> ContactsScreen()
+//                    ScreenRoute.CallLog -> CallLogScreen()
+//                    ScreenRoute.Messages -> SmsScreen()
+//                }
+                NavHost(navController = navController, startDestination = MainNavGraphRoute){
+                    mainNavGraph(navController = navController)
                 }
             }
         }
