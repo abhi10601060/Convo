@@ -94,88 +94,86 @@ fun CallLogScreen(
         }
     }
 
-    ConvoTheme {
-        Scaffold(
-            topBar = {
-                ConvoTabs(
-                    titles = listOf("Incoming", "Outgoing", "Missed"),
-                    selectedIndex = selectedTabIndex,
-                    onTabSelected = { selectedTabIndex = it }
-                )
-            }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                when (uiState.permissionStatus) {
-                    PermissionStatus.GRANTED -> {
-                        when (val state = uiState.callLogUiState) {
-                            is CallLogUiState.Loading -> {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    Scaffold(
+        topBar = {
+            ConvoTabs(
+                titles = listOf("Incoming", "Outgoing", "Missed"),
+                selectedIndex = selectedTabIndex,
+                onTabSelected = { selectedTabIndex = it }
+            )
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+            when (uiState.permissionStatus) {
+                PermissionStatus.GRANTED -> {
+                    when (val state = uiState.callLogUiState) {
+                        is CallLogUiState.Loading -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                        is CallLogUiState.Success -> {
+                            val filteredLogs = when (selectedTabIndex) {
+                                0 -> state.callLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+                                1 -> state.callLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+                                2 -> state.callLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
+                                else -> state.callLogs
                             }
-                            is CallLogUiState.Success -> {
-                                val filteredLogs = when (selectedTabIndex) {
-                                    0 -> state.callLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                                    1 -> state.callLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                                    2 -> state.callLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                                    else -> state.callLogs
-                                }
-                                
-                                if (filteredLogs.isEmpty()) {
-                                    Text(
-                                        text = "No calls found",
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
-                                } else {
-                                    LazyColumn {
-                                        items(filteredLogs) { log ->
-                                            CallLogItem(
-                                                callLog = log,
-                                                onCallClick = {
-                                                    val intent = Intent(Intent.ACTION_DIAL).apply {
-                                                        data = Uri.parse("tel:${log.number}")
-                                                    }
-                                                    context.startActivity(intent)
+                            
+                            if (filteredLogs.isEmpty()) {
+                                Text(
+                                    text = "No calls found",
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            } else {
+                                LazyColumn {
+                                    items(filteredLogs) { log ->
+                                        CallLogItem(
+                                            callLog = log,
+                                            onCallClick = {
+                                                val intent = Intent(Intent.ACTION_DIAL).apply {
+                                                    data = Uri.parse("tel:${log.number}")
                                                 }
-                                            )
-                                            HorizontalDivider(
-                                                modifier = Modifier.padding(horizontal = 16.dp),
-                                                thickness = 0.5.dp,
-                                                color = MaterialTheme.colorScheme.outlineVariant
-                                            )
-                                        }
+                                                context.startActivity(intent)
+                                            }
+                                        )
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                            thickness = 0.5.dp,
+                                            color = MaterialTheme.colorScheme.outlineVariant
+                                        )
                                     }
                                 }
                             }
-                            is CallLogUiState.Error -> {
-                                Text(
-                                    text = state.message,
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                            else -> {}
                         }
+                        is CallLogUiState.Error -> {
+                            Text(
+                                text = state.message,
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        else -> {}
                     }
-                    PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
-                        PermissionView(
-                            message = "Call Log permission is required to show your calls.",
-                            buttonText = "Grant Permission",
-                            onButtonClick = { launcher.launch(Manifest.permission.READ_CALL_LOG) }
-                        )
-                    }
-                    PermissionStatus.SHOW_SETTINGS -> {
-                        PermissionView(
-                            message = "Call Log permission is required. Please enable it in settings.",
-                            buttonText = "Open Settings",
-                            onButtonClick = {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.fromParts("package", context.packageName, null)
-                                }
-                                context.startActivity(intent)
-                            }
-                        )
-                    }
-                    else -> {}
                 }
+                PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
+                    PermissionView(
+                        message = "Call Log permission is required to show your calls.",
+                        buttonText = "Grant Permission",
+                        onButtonClick = { launcher.launch(Manifest.permission.READ_CALL_LOG) }
+                    )
+                }
+                PermissionStatus.SHOW_SETTINGS -> {
+                    PermissionView(
+                        message = "Call Log permission is required. Please enable it in settings.",
+                        buttonText = "Open Settings",
+                        onButtonClick = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+                else -> {}
             }
         }
     }

@@ -113,37 +113,35 @@ fun ContactsScreen(
         }
     }
 
-    ConvoTheme {
-        Scaffold(
-            topBar = {
-                ConvoTabs(
-                    titles = listOf("Local", "Remote"),
-                    selectedIndex = selectedTabIndex,
-                    onTabSelected = { selectedTabIndex = it }
-                )
-            }
-        ) { padding ->
-            if (selectedTabIndex == 0){
-                LocalContacts(
-                    modifier = Modifier.padding(padding),
-                    uiState = uiState.localContactsUiState,
-                    permissionStatus = uiState.permissionStatus,
-                    onPermissionGrant = { launcher.launch(Manifest.permission.READ_CONTACTS) },
-                    onSettingsClick = {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
-                        }
-                        context.startActivity(intent)
-                    },
-                    listState = localListState
-                )
-            } else {
-                RemoteContacts(
-                    modifier = Modifier.padding(padding),
-                    uiState = uiState.remoteContactsUiState,
-                    listState = remoteListState
-                )
-            }
+    Scaffold(
+        topBar = {
+            ConvoTabs(
+                titles = listOf("Local", "Remote"),
+                selectedIndex = selectedTabIndex,
+                onTabSelected = { selectedTabIndex = it }
+            )
+        }
+    ) { padding ->
+        if (selectedTabIndex == 0) {
+            LocalContacts(
+                modifier = Modifier.padding(padding),
+                uiState = uiState.localContactsUiState,
+                permissionStatus = uiState.permissionStatus,
+                onPermissionGrant = { launcher.launch(Manifest.permission.READ_CONTACTS) },
+                onSettingsClick = {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                },
+                listState = localListState
+            )
+        } else {
+            RemoteContacts(
+                modifier = Modifier.padding(padding),
+                uiState = uiState.remoteContactsUiState,
+                listState = remoteListState
+            )
         }
     }
 }

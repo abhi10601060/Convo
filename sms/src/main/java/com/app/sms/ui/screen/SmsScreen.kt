@@ -92,59 +92,55 @@ fun SmsScreen(
         }
     }
 
-    ConvoTheme {
-        Scaffold { padding ->
-            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                when (uiState.permissionStatus) {
-                    PermissionStatus.GRANTED -> {
-                        when (val state = uiState.smsUiState) {
-                            is SMSUiState.Loading -> {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-                            is SMSUiState.Success -> {
-                                LazyColumn {
-                                    items(state.smsList) { sms ->
-                                        SmsItem(sms = sms, onClick = { selectedSms = sms })
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            thickness = 0.5.dp,
-                                            color = MaterialTheme.colorScheme.outlineVariant
-                                        )
-                                    }
-                                }
-                            }
-                            is SMSUiState.Error -> {
-                                Text(
-                                    text = state.message,
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = MaterialTheme.colorScheme.error
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (uiState.permissionStatus) {
+            PermissionStatus.GRANTED -> {
+                when (val state = uiState.smsUiState) {
+                    is SMSUiState.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    is SMSUiState.Success -> {
+                        LazyColumn {
+                            items(state.smsList) { sms ->
+                                SmsItem(sms = sms, onClick = { selectedSms = sms })
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant
                                 )
                             }
-                            else -> {}
                         }
                     }
-                    PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
-                        PermissionView(
-                            message = "SMS permission is required to show your messages.",
-                            buttonText = "Grant Permission",
-                            onButtonClick = { launcher.launch(Manifest.permission.READ_SMS) }
-                        )
-                    }
-                    PermissionStatus.SHOW_SETTINGS -> {
-                        PermissionView(
-                            message = "SMS permission is required. Please enable it in settings.",
-                            buttonText = "Open Settings",
-                            onButtonClick = {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.fromParts("package", context.packageName, null)
-                                }
-                                context.startActivity(intent)
-                            }
+                    is SMSUiState.Error -> {
+                        Text(
+                            text = state.message,
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                     else -> {}
                 }
             }
+            PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
+                PermissionView(
+                    message = "SMS permission is required to show your messages.",
+                    buttonText = "Grant Permission",
+                    onButtonClick = { launcher.launch(Manifest.permission.READ_SMS) }
+                )
+            }
+            PermissionStatus.SHOW_SETTINGS -> {
+                PermissionView(
+                    message = "SMS permission is required. Please enable it in settings.",
+                    buttonText = "Open Settings",
+                    onButtonClick = {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                )
+            }
+            else -> {}
         }
     }
 
