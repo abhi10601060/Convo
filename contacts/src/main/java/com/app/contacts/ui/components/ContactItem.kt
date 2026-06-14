@@ -67,10 +67,17 @@ fun ContactItem(contact: ContactDomain) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = contact.phoneNumber ?: "No number",
+                text = contact.phoneNumber ?: contact.email ?: "No contact info",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (contact.phoneNumber != null && contact.email != null) {
+                Text(
+                    text = contact.email,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
         }
     }
 }

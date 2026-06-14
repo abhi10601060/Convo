@@ -6,14 +6,16 @@ data class ContactDomain(
     val id: String,
     val displayName: String,
     val phoneNumber: String?,
-    val photoUri: Uri?
+    val photoUri: Uri?,
+    val email: String? = null
 ){
     companion object{
         val dummy = ContactDomain(
             id = "1",
             displayName = "Abhi Velekar",
             phoneNumber = "7772228976",
-            photoUri = null
+            photoUri = null,
+            email = "abhi@example.com"
         )
     }
 }

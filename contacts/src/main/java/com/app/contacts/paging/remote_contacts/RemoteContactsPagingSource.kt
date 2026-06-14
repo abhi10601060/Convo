@@ -20,7 +20,8 @@ class RemoteContactsPagingSource(
                     id = user.id.toString(),
                     displayName = "${user.firstName} ${user.lastName}",
                     phoneNumber = user.phone,
-                    photoUri = Uri.parse(user.image)
+                    photoUri = Uri.parse(user.image),
+                    email = user.email
                 )
             }
             

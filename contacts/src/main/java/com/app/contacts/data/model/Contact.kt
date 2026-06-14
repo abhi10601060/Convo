@@ -7,7 +7,8 @@ data class Contact(
     val id: String,
     val displayName: String,
     val phoneNumber: String?,
-    val photoUri: Uri?
+    val photoUri: Uri?,
+    val email: String? = null
 )
 
 fun Contact.toDomain() : ContactDomain{
@@ -15,7 +16,8 @@ fun Contact.toDomain() : ContactDomain{
         id = this.id,
         displayName = this.displayName,
         phoneNumber = this.phoneNumber,
-        photoUri = this.photoUri
+        photoUri = this.photoUri,
+        email = this.email
     )
 }
 
