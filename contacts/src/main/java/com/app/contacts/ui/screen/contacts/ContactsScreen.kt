@@ -145,6 +145,7 @@ fun ContactsScreen(
                     selectedContact = contact
                     showBottomSheet = true
                 },
+                onRefresh = { viewModel.loadLocalContacts() },
                 listState = localListState
             )
         } else {

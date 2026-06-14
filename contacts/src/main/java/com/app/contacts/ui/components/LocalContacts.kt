@@ -17,10 +17,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.ui.screen.contacts.LocalContactsUiState
 import com.app.contacts.ui.util.PermissionStatus
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalContacts(
     modifier: Modifier = Modifier,
@@ -39,6 +41,7 @@ fun LocalContacts(
     onPermissionGrant: () -> Unit,
     onSettingsClick: () -> Unit,
     onContactClick: (ContactDomain) -> Unit,
+    onRefresh: () -> Unit,
     listState: LazyListState = rememberLazyListState()
 ) {
     Column(
@@ -55,34 +58,40 @@ fun LocalContacts(
                 }
             )
         } else {
-            when (val state = uiState) {
-                is LocalContactsUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+            PullToRefreshBox(
+                isRefreshing = uiState is LocalContactsUiState.Loading,
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when (val state = uiState) {
+                    is LocalContactsUiState.Loading -> {
+                        // If it's the first load and we don't have items, show indicator in center
+                        // But PullToRefreshBox also shows an indicator.
+                        // Usually, if isRefreshing is true, PullToRefreshBox shows its own.
                     }
-                }
-                is LocalContactsUiState.Success -> {
-                    if (state.contacts.isEmpty()) {
-                        EmptyContactsView()
-                    } else {
-                        ContactList(
-                            contacts = state.contacts,
-                            onContactClick = onContactClick,
-                            state = listState
-                        )
+                    is LocalContactsUiState.Success -> {
+                        if (state.contacts.isEmpty()) {
+                            EmptyContactsView()
+                        } else {
+                            ContactList(
+                                contacts = state.contacts,
+                                onContactClick = onContactClick,
+                                state = listState
+                            )
+                        }
                     }
-                }
-                is LocalContactsUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Center
-                        )
+                    is LocalContactsUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
+                    is LocalContactsUiState.Idle -> {}
                 }
-                is LocalContactsUiState.Idle -> {}
             }
         }
     }
