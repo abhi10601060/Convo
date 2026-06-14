@@ -45,9 +45,9 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
-    implementation(project(":contacts"))
-    implementation(project(":sms"))
-    implementation(project(":call_log"))
+    implementation(project(":feature:contacts"))
+    implementation(project(":feature:sms"))
+    implementation(project(":feature:call_log"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
