@@ -22,7 +22,7 @@ fun SmsDetailDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "From: ${sms.address}",
+                text = "From: ${sms.senderName ?: sms.address}",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )

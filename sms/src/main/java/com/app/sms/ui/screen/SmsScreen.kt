@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -43,15 +44,20 @@ fun SmsScreen(
     var selectedSms by remember { mutableStateOf<SmsDomain?>(null) }
 
     val checkPermissionStatus = {
-        val permission = Manifest.permission.READ_SMS
+        val permissions = arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)
+        val allGranted = permissions.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+
         when {
-            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED -> {
+            allGranted -> {
                 viewModel.changePermissionStatus(PermissionStatus.GRANTED)
             }
-            activity != null && ActivityCompat.shouldShowRequestPermissionRationale(activity, permission) -> {
+            activity != null && permissions.any { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) } -> {
                 viewModel.changePermissionStatus(PermissionStatus.SHOW_RATIONALE)
             }
-            viewModel.hasAskedBeforeSmsPermission && activity != null && !ActivityCompat.shouldShowRequestPermissionRationale(activity, permission) -> {
+            viewModel.hasAskedBeforeSmsPermission && activity != null -> {
+                // If we've asked before and some are not granted and no rationale, they might have checked "Don't ask again"
                 viewModel.changePermissionStatus(PermissionStatus.SHOW_SETTINGS)
             }
             else -> {
@@ -78,7 +84,7 @@ fun SmsScreen(
     }
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { _ ->
             viewModel.hasAskedBeforeSmsPermission = true
             checkPermissionStatus()
@@ -89,7 +95,7 @@ fun SmsScreen(
         if (uiState.permissionStatus == PermissionStatus.GRANTED) {
             viewModel.loadSmsMessages()
         } else if (uiState.permissionStatus == PermissionStatus.SHOW_FIRST_TIME) {
-            launcher.launch(Manifest.permission.READ_SMS)
+            launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
         }
     }
 
@@ -97,7 +103,7 @@ fun SmsScreen(
         when (uiState.permissionStatus) {
             PermissionStatus.GRANTED -> {
                 PullToRefreshBox(
-                    isRefreshing = uiState is SMSUiState.Loading,
+                    isRefreshing = uiState.smsUiState is SMSUiState.Loading,
                     onRefresh = {
                         viewModel.loadSmsMessages()
                     },
@@ -105,8 +111,6 @@ fun SmsScreen(
                 ) {
                     when (val state = uiState.smsUiState) {
                         is SMSUiState.Loading -> {
-                            //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            // No need as Pull to refresh have its initial loading
                         }
                         is SMSUiState.Success -> {
                             LazyColumn {
@@ -133,14 +137,14 @@ fun SmsScreen(
             }
             PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
                 PermissionView(
-                    message = "SMS permission is required to show your messages.",
-                    buttonText = "Grant Permission",
-                    onButtonClick = { launcher.launch(Manifest.permission.READ_SMS) }
+                    message = "SMS and Contacts permissions are required to show your messages with names.",
+                    buttonText = "Grant Permissions",
+                    onButtonClick = { launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)) }
                 )
             }
             PermissionStatus.SHOW_SETTINGS -> {
                 PermissionView(
-                    message = "SMS permission is required. Please enable it in settings.",
+                    message = "SMS and Contacts permissions are required. Please enable them in settings.",
                     buttonText = "Open Settings",
                     onButtonClick = {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -166,7 +170,9 @@ fun PermissionView(
     onButtonClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -184,4 +190,12 @@ private fun Context.findActivity(): Activity? {
         context = context.baseContext
     }
     return null
+}
+
+@Preview
+@Composable
+private fun SMSScreenPrev() {
+    ConvoTheme {
+        SmsScreen()
+    }
 }

@@ -42,8 +42,9 @@ fun SmsItem(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
+            val displayLetter = (sms.senderName ?: sms.address).firstOrNull()?.toString()?.uppercase() ?: "?"
             Text(
-                text = sms.address.firstOrNull()?.toString()?.uppercase() ?: "?",
+                text = displayLetter,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -60,7 +61,7 @@ fun SmsItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = sms.address,
+                    text = sms.senderName ?: sms.address,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
