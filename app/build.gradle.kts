@@ -44,6 +44,7 @@ android {
 
 dependencies {
     implementation(project(":core:ui"))
+    implementation(project(":core:data"))
     implementation(project(":contacts"))
     implementation(project(":sms"))
     implementation(project(":call_log"))

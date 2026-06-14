@@ -34,17 +34,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -65,8 +64,9 @@ enum class Screen(val title: String, val icon: ImageVector, val screenRoute: Scr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScreen(
+    viewModel: AppScreenViewModel = hiltViewModel(),
     isDarkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    onThemeToggle: () -> Unit,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -75,16 +75,15 @@ fun AppScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    var currentScreen by remember { mutableStateOf(Screen.Contacts) }
+    val currentScreen by viewModel.currentScreen.collectAsState()
 
-    // Sync currentScreen with navigation state
-    LaunchedEffect(currentDestination) {
-        Screen.entries.forEach { screen ->
-            if (currentDestination?.route?.contains(screen.screenRoute::class.qualifiedName ?: "") == true) {
-                currentScreen = screen
-            }
-        }
-    }
+//    LaunchedEffect(currentDestination) {
+//        Screen.entries.forEach { screen ->
+//            if (currentDestination?.route?.contains(screen.screenRoute::class.qualifiedName ?: "") == true) {
+//                currentScreen = screen
+//            }
+//        }
+//    }
 
     val navigateToScreen: (Screen) -> Unit = { screen ->
         navController.navigate(screen.screenRoute) {
@@ -94,6 +93,10 @@ fun AppScreen(
             launchSingleTop = true
             restoreState = true
         }
+    }
+
+    LaunchedEffect(currentScreen) {
+        navigateToScreen(currentScreen)
     }
 
     ModalNavigationDrawer(
@@ -147,7 +150,7 @@ fun AppScreen(
                         label = { Text(screen.title) },
                         selected = currentScreen == screen,
                         onClick = {
-                            navigateToScreen(screen)
+                            viewModel.updateCurrentScreen(screen)
                             scope.launch { drawerState.close() }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -190,8 +193,7 @@ fun AppScreen(
 @Composable
 private fun AppScreenPrev() {
     ConvoTheme {
-        AppScreen(false) {
-
+        AppScreen(isDarkTheme = false) {
         }
     }
 }
