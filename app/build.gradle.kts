@@ -10,11 +10,7 @@ plugins {
 
 android {
     namespace = "com.app.convo"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.app.convo"
