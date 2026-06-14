@@ -1,13 +1,17 @@
 package com.app.contacts.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -75,28 +79,40 @@ fun RemoteContacts(
                                 loadState.refresh is LoadState.Error -> {
                                     val e = pagingItems.loadState.refresh as LoadState.Error
                                     item {
-                                        Box(
+                                        Column(
                                             modifier = Modifier.fillParentMaxSize(),
-                                            contentAlignment = Alignment.Center
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Text(
-                                                text = e.error.localizedMessage ?: "Unknown Error",
+                                                text = e.error.localizedMessage ?: "Connection Error",
                                                 color = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier.padding(16.dp),
                                                 textAlign = TextAlign.Center
                                             )
+                                            Button(onClick = { retry() }) {
+                                                Text("Retry")
+                                            }
                                         }
                                     }
                                 }
                                 loadState.append is LoadState.Error -> {
                                     val e = pagingItems.loadState.append as LoadState.Error
                                     item {
-                                        Text(
-                                            text = e.error.localizedMessage ?: "Unknown Error",
-                                            color = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.padding(16.dp),
-                                            textAlign = TextAlign.Center
-                                        )
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = e.error.localizedMessage ?: "Connection Error",
+                                                color = MaterialTheme.colorScheme.error,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Button(onClick = { retry() }) {
+                                                Text("Retry")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -116,3 +132,4 @@ fun RemoteContacts(
         }
     }
 }
+
