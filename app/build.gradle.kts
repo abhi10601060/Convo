@@ -20,8 +20,8 @@ android {
         applicationId = "com.app.convo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1002
-        versionName = "1.0.02"
+        versionCode = 1101
+        versionName = "1.1.01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

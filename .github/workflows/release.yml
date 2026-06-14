@@ -3,7 +3,7 @@ name: Android Firebase App Distribution
 on:
   push:
     branches:
-      - feature/ci # Automatically executes when code is pushed or merged into the main branch
+      - release/1.1 # Automatically executes when code is pushed or merged into the main branch
 
 jobs:
   distribute:
