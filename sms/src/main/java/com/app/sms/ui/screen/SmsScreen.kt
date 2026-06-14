@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,30 +96,39 @@ fun SmsScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when (uiState.permissionStatus) {
             PermissionStatus.GRANTED -> {
-                when (val state = uiState.smsUiState) {
-                    is SMSUiState.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-                    is SMSUiState.Success -> {
-                        LazyColumn {
-                            items(state.smsList) { sms ->
-                                SmsItem(sms = sms, onClick = { selectedSms = sms })
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    thickness = 0.5.dp,
-                                    color = MaterialTheme.colorScheme.outlineVariant
-                                )
+                PullToRefreshBox(
+                    isRefreshing = uiState is SMSUiState.Loading,
+                    onRefresh = {
+                        viewModel.loadSmsMessages()
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    when (val state = uiState.smsUiState) {
+                        is SMSUiState.Loading -> {
+                            //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            // No need as Pull to refresh have its initial loading
+                        }
+                        is SMSUiState.Success -> {
+                            LazyColumn {
+                                items(state.smsList) { sms ->
+                                    SmsItem(sms = sms, onClick = { selectedSms = sms })
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        thickness = 0.5.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant
+                                    )
+                                }
                             }
                         }
+                        is SMSUiState.Error -> {
+                            Text(
+                                text = state.message,
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        else -> {}
                     }
-                    is SMSUiState.Error -> {
-                        Text(
-                            text = state.message,
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                    else -> {}
                 }
             }
             PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
