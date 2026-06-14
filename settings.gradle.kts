@@ -25,7 +25,8 @@ dependencyResolutionManagement {
 rootProject.name = "Convo"
 include(":app")
 include(":core:ui")
-include(":contacts")
 include(":core:network")
-include(":sms")
-include(":call_log")
+include(":core:data")
+include(":feature:contacts")
+include(":feature:sms")
+include(":feature:call_log")

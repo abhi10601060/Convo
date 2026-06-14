@@ -1,6 +1,7 @@
 package com.app.convo.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Sms
@@ -32,23 +32,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.app.convo.R
 import com.app.convo.ui.component.ThemeToggleButton
 import com.app.convo.ui.navigation.MainNavGraphRoute
 import com.app.convo.ui.navigation.ScreenRoute
@@ -65,26 +69,20 @@ enum class Screen(val title: String, val icon: ImageVector, val screenRoute: Scr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScreen(
+    viewModel: AppScreenViewModel = hiltViewModel(),
     isDarkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    onThemeToggle: () -> Unit,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        rememberTopAppBarState()
+    )
+
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
 
-    var currentScreen by remember { mutableStateOf(Screen.Contacts) }
-
-    // Sync currentScreen with navigation state
-    LaunchedEffect(currentDestination) {
-        Screen.entries.forEach { screen ->
-            if (currentDestination?.route?.contains(screen.screenRoute::class.qualifiedName ?: "") == true) {
-                currentScreen = screen
-            }
-        }
-    }
+    val currentScreen by viewModel.currentScreen.collectAsState()
 
     val navigateToScreen: (Screen) -> Unit = { screen ->
         navController.navigate(screen.screenRoute) {
@@ -94,6 +92,10 @@ fun AppScreen(
             launchSingleTop = true
             restoreState = true
         }
+    }
+
+    LaunchedEffect(currentScreen) {
+        navigateToScreen(currentScreen)
     }
 
     ModalNavigationDrawer(
@@ -113,14 +115,14 @@ fun AppScreen(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .background(MaterialTheme.colorScheme.surface),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ChatBubble,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            Image(
+                                painter = painterResource(id = R.mipmap.convo_app_logo_foreground),
+                                contentDescription = "app logo",
+                                modifier = Modifier.size(80.dp),
+                                contentScale = ContentScale.None
                             )
                         }
                         
@@ -147,7 +149,7 @@ fun AppScreen(
                         label = { Text(screen.title) },
                         selected = currentScreen == screen,
                         onClick = {
-                            navigateToScreen(screen)
+                            viewModel.updateCurrentScreen(screen)
                             scope.launch { drawerState.close() }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -167,11 +169,14 @@ fun AppScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
+                        scrolledContainerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary,
                         navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    ),
+                    scrollBehavior = scrollBehavior
                 )
-            }
+            },
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
                 NavHost(navController = navController, startDestination = MainNavGraphRoute){
@@ -190,8 +195,7 @@ fun AppScreen(
 @Composable
 private fun AppScreenPrev() {
     ConvoTheme {
-        AppScreen(false) {
-
+        AppScreen(isDarkTheme = false) {
         }
     }
 }

@@ -10,12 +10,14 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/call_log" />
-            <option value="$PROJECT_DIR$/contacts" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/data" />
             <option value="$PROJECT_DIR$/core/network" />
             <option value="$PROJECT_DIR$/core/ui" />
-            <option value="$PROJECT_DIR$/sms" />
+            <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/call_log" />
+            <option value="$PROJECT_DIR$/feature/contacts" />
+            <option value="$PROJECT_DIR$/feature/sms" />
           </set>
         </option>
       </GradleProjectSettings>
