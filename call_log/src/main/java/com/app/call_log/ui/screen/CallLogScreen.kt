@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -106,52 +107,61 @@ fun CallLogScreen(
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (uiState.permissionStatus) {
                 PermissionStatus.GRANTED -> {
-                    when (val state = uiState.callLogUiState) {
-                        is CallLogUiState.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-                        is CallLogUiState.Success -> {
-                            val filteredLogs = when (selectedTabIndex) {
-                                0 -> state.callLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                                1 -> state.callLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                                2 -> state.callLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                                else -> state.callLogs
+                    PullToRefreshBox(
+                        isRefreshing = uiState is CallLogUiState.Loading,
+                        onRefresh = {
+                            viewModel.loadCallLogs()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        when (val state = uiState.callLogUiState) {
+                            is CallLogUiState.Loading -> {
+                                // CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                // No Need of handling as handled in Pull to refersh box
                             }
-                            
-                            if (filteredLogs.isEmpty()) {
-                                Text(
-                                    text = "No calls found",
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            } else {
-                                LazyColumn {
-                                    items(filteredLogs) { log ->
-                                        CallLogItem(
-                                            callLog = log,
-                                            onCallClick = {
-                                                val intent = Intent(Intent.ACTION_DIAL).apply {
-                                                    data = Uri.parse("tel:${log.number}")
+                            is CallLogUiState.Success -> {
+                                val filteredLogs = when (selectedTabIndex) {
+                                    0 -> state.callLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+                                    1 -> state.callLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+                                    2 -> state.callLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
+                                    else -> state.callLogs
+                                }
+
+                                if (filteredLogs.isEmpty()) {
+                                    Text(
+                                        text = "No calls found",
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                } else {
+                                    LazyColumn {
+                                        items(filteredLogs) { log ->
+                                            CallLogItem(
+                                                callLog = log,
+                                                onCallClick = {
+                                                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                                                        data = Uri.parse("tel:${log.number}")
+                                                    }
+                                                    context.startActivity(intent)
                                                 }
-                                                context.startActivity(intent)
-                                            }
-                                        )
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            thickness = 0.5.dp,
-                                            color = MaterialTheme.colorScheme.outlineVariant
-                                        )
+                                            )
+                                            HorizontalDivider(
+                                                modifier = Modifier.padding(horizontal = 16.dp),
+                                                thickness = 0.5.dp,
+                                                color = MaterialTheme.colorScheme.outlineVariant
+                                            )
+                                        }
                                     }
                                 }
                             }
+                            is CallLogUiState.Error -> {
+                                Text(
+                                    text = state.message,
+                                    modifier = Modifier.align(Alignment.Center),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            else -> {}
                         }
-                        is CallLogUiState.Error -> {
-                            Text(
-                                text = state.message,
-                                modifier = Modifier.align(Alignment.Center),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        else -> {}
                     }
                 }
                 PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
