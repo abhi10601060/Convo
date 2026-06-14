@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.app.contacts.domain.usecase.GetLocalContactsUseCase
 import com.app.contacts.domain.usecase.GetRemoteContactsUseCase
-import com.app.contacts.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

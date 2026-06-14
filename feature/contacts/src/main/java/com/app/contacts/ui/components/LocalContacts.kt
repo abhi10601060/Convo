@@ -4,21 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -30,7 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.ui.screen.contacts.LocalContactsUiState
-import com.app.contacts.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
+import com.app.ui.components.PermissionDeniedContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,10 +46,13 @@ fun LocalContacts(
         if (permissionStatus != PermissionStatus.GRANTED ) {
             val showSettingsButton = permissionStatus == PermissionStatus.SHOW_SETTINGS
             PermissionDeniedContent(
-                showSettingsButton = showSettingsButton,
-                onGrantClick = { onPermissionGrant() },
-                onSettingsClick = {
-                    onSettingsClick()
+                icon = Icons.Default.Contacts,
+                message = if (showSettingsButton)
+                    "Contacts access is permanently denied. Please enable it in system settings to use this feature."
+                else "We need access to your local contacts to show them here.",
+                buttonText = if (showSettingsButton) "Open Settings" else "Grant Permission",
+                onButtonClick = {
+                    if (showSettingsButton) onSettingsClick() else onPermissionGrant()
                 }
             )
         } else {
@@ -118,45 +116,6 @@ fun ContactList(
         }
     }
 }
-
-@Composable
-fun PermissionDeniedContent(
-    showSettingsButton: Boolean,
-    onGrantClick: () -> Unit,
-    onSettingsClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Contacts,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = if (showSettingsButton)
-                "Contacts access is permanently denied. Please enable it in system settings to use this feature."
-            else "We need access to your local contacts to show them here.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = { if (showSettingsButton) onSettingsClick() else onGrantClick() },
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(if (showSettingsButton) "Open Settings" else "Grant Permission")
-        }
-    }
-}
-
 
 @Preview
 @Composable

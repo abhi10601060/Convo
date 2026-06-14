@@ -2,7 +2,7 @@ package com.app.contacts.ui.screen.contacts
 
 import androidx.paging.PagingData
 import com.app.contacts.domain.model.ContactDomain
-import com.app.contacts.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
 import kotlinx.coroutines.flow.Flow
 
 

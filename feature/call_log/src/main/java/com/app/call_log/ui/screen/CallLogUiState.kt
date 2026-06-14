@@ -1,7 +1,7 @@
 package com.app.call_log.ui.screen
 
 import com.app.call_log.domain.model.CallLogDomain
-import com.app.call_log.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
 
 data class CallLogScreenUiState(
     val callLogUiState: CallLogUiState = CallLogUiState.Idle,

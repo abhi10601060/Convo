@@ -13,6 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -30,7 +32,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.app.sms.domain.model.SmsDomain
 import com.app.sms.ui.component.SmsDetailDialog
 import com.app.sms.ui.component.SmsItem
-import com.app.sms.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
+import com.app.ui.components.PermissionDeniedContent
 import com.app.ui.theme.ConvoTheme
 
 @Composable
@@ -136,14 +139,18 @@ fun SmsScreen(
                 }
             }
             PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
-                PermissionView(
+                PermissionDeniedContent(
+                    icon = Icons.Default.Sms,
                     message = "SMS and Contacts permissions are required to show your messages with names.",
                     buttonText = "Grant Permissions",
-                    onButtonClick = { launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS)) }
+                    onButtonClick = {
+                        launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
+                    }
                 )
             }
             PermissionStatus.SHOW_SETTINGS -> {
-                PermissionView(
+                PermissionDeniedContent(
+                    icon = Icons.Default.Sms,
                     message = "SMS and Contacts permissions are required. Please enable them in settings.",
                     buttonText = "Open Settings",
                     onButtonClick = {
@@ -160,26 +167,6 @@ fun SmsScreen(
 
     selectedSms?.let { sms ->
         SmsDetailDialog(sms = sms, onDismiss = { selectedSms = null })
-    }
-}
-
-@Composable
-fun PermissionView(
-    message: String,
-    buttonText: String,
-    onButtonClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = message, modifier = Modifier.padding(bottom = 16.dp))
-        Button(onClick = onButtonClick) {
-            Text(text = buttonText)
-        }
     }
 }
 

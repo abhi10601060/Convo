@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -30,8 +32,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.app.call_log.domain.model.CallLogDomain
 import com.app.call_log.ui.component.CallLogItem
-import com.app.call_log.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
 import com.app.ui.components.ConvoTabs
+import com.app.ui.components.PermissionDeniedContent
 import com.app.ui.theme.ConvoTheme
 
 @Composable
@@ -165,14 +168,16 @@ fun CallLogScreen(
                     }
                 }
                 PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
-                    PermissionView(
+                    PermissionDeniedContent(
+                        icon = Icons.Default.Call,
                         message = "Call Log permission is required to show your calls.",
                         buttonText = "Grant Permission",
                         onButtonClick = { launcher.launch(Manifest.permission.READ_CALL_LOG) }
                     )
                 }
                 PermissionStatus.SHOW_SETTINGS -> {
-                    PermissionView(
+                    PermissionDeniedContent(
+                        icon = Icons.Default.Call,
                         message = "Call Log permission is required. Please enable it in settings.",
                         buttonText = "Open Settings",
                         onButtonClick = {
@@ -185,24 +190,6 @@ fun CallLogScreen(
                 }
                 else -> {}
             }
-        }
-    }
-}
-
-@Composable
-fun PermissionView(
-    message: String,
-    buttonText: String,
-    onButtonClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = message, modifier = Modifier.padding(bottom = 16.dp))
-        Button(onClick = onButtonClick) {
-            Text(text = buttonText)
         }
     }
 }

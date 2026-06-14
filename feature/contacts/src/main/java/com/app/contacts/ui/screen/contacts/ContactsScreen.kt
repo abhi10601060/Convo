@@ -35,7 +35,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.ui.components.LocalContacts
 import com.app.contacts.ui.components.RemoteContacts
-import com.app.contacts.ui.util.PermissionStatus
+import com.app.ui.util.PermissionStatus
 import com.app.ui.components.ContactActionBottomSheet
 import com.app.ui.components.ConvoTabs
 import com.app.ui.theme.ConvoTheme
