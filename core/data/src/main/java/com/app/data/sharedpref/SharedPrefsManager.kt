@@ -13,4 +13,11 @@ class SharedPrefsManager(
     var lastRoute: String
         get() = prefs.getString("last_route", "") ?: ""
         set(value) = prefs.edit { putString("last_route", value) }
+
+    var isDarkTheme: Boolean?
+        get() = if (prefs.contains("is_dark_theme")) prefs.getBoolean("is_dark_theme", false) else null
+        set(value) = prefs.edit { 
+            if (value != null) putBoolean("is_dark_theme", value) 
+            else remove("is_dark_theme")
+        }
 }
