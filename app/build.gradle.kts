@@ -1,3 +1,5 @@
+import org.gradle.language.nativeplatform.internal.Dimensions.applicationVariants
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -18,8 +20,8 @@ android {
         applicationId = "com.app.convo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 1001
+        versionName = "1.0.01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,6 +55,21 @@ android {
         compose = true
     }
 }
+
+androidComponents {
+    onVariants { variant ->
+        val flavorName = variant.flavorName ?: ""
+        val buildType = variant.buildType ?: ""
+
+        val buildVariant = if (flavorName.isNotEmpty()) "${flavorName}_${buildType}" else buildType
+
+        variant.outputs.forEach { output ->
+            val versionName = output.versionName.get()
+            output.outputFileName.set("convo_${buildVariant}_${versionName}.apk")
+        }
+    }
+}
+
 
 dependencies {
     implementation(project(":core:ui"))
