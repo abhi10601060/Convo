@@ -1,6 +1,7 @@
 package com.app.convo.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Sms
@@ -41,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,6 +50,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.app.convo.R
 import com.app.convo.ui.component.ThemeToggleButton
 import com.app.convo.ui.navigation.MainNavGraphRoute
 import com.app.convo.ui.navigation.ScreenRoute
@@ -76,14 +79,6 @@ fun AppScreen(
     val currentDestination = navBackStackEntry?.destination
 
     val currentScreen by viewModel.currentScreen.collectAsState()
-
-//    LaunchedEffect(currentDestination) {
-//        Screen.entries.forEach { screen ->
-//            if (currentDestination?.route?.contains(screen.screenRoute::class.qualifiedName ?: "") == true) {
-//                currentScreen = screen
-//            }
-//        }
-//    }
 
     val navigateToScreen: (Screen) -> Unit = { screen ->
         navController.navigate(screen.screenRoute) {
@@ -116,14 +111,14 @@ fun AppScreen(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .background(MaterialTheme.colorScheme.surface),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ChatBubble,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            Image(
+                                painter = painterResource(id = R.mipmap.convo_app_logo_foreground),
+                                contentDescription = "app logo",
+                                modifier = Modifier.size(80.dp),
+                                contentScale = ContentScale.None
                             )
                         }
                         

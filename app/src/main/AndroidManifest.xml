@@ -6,6 +6,7 @@
 
     <application
         android:name=".application.ConvoApplication"
+        android:logo="@mipmap/convo_app_logo"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
