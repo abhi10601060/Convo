@@ -1,6 +1,7 @@
 package com.app.contacts.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -27,9 +29,15 @@ import com.app.contacts.domain.model.ContactDomain
 import com.app.ui.theme.ConvoTheme
 
 @Composable
-fun ContactItem(contact: ContactDomain) {
+fun ContactItem(
+    contact: ContactDomain,
+    onClick: () -> Unit
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (contact.photoUri != null) {
@@ -87,7 +95,8 @@ fun ContactItem(contact: ContactDomain) {
 private fun ContactItemPrev() {
     ConvoTheme {
         ContactItem(
-            contact = ContactDomain.dummy
+            contact = ContactDomain.dummy,
+            onClick = {}
         )
     }
 }

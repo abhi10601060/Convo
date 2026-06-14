@@ -38,6 +38,7 @@ fun LocalContacts(
     permissionStatus: PermissionStatus,
     onPermissionGrant: () -> Unit,
     onSettingsClick: () -> Unit,
+    onContactClick: (ContactDomain) -> Unit,
     listState: LazyListState = rememberLazyListState()
 ) {
     Column(
@@ -66,6 +67,7 @@ fun LocalContacts(
                     } else {
                         ContactList(
                             contacts = state.contacts,
+                            onContactClick = onContactClick,
                             state = listState
                         )
                     }
@@ -90,16 +92,20 @@ fun LocalContacts(
 @Composable
 fun ContactList(
     contacts: List<ContactDomain>,
+    onContactClick: (ContactDomain) -> Unit,
     state: LazyListState = rememberLazyListState()
 ) {
     LazyColumn(
         state = state,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(contacts) { contact ->
-            ContactItem(contact = contact)
+            ContactItem(
+                contact = contact,
+                onClick = { onContactClick(contact) }
+            )
         }
     }
 }

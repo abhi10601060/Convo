@@ -23,12 +23,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.ui.screen.contacts.RemoteContactsUiState
 
 @Composable
 fun RemoteContacts(
     modifier: Modifier = Modifier,
     uiState: RemoteContactsUiState,
+    onContactClick: (ContactDomain) -> Unit,
     listState: LazyListState = rememberLazyListState()
 ) {
     Column(
@@ -45,7 +47,10 @@ fun RemoteContacts(
                     ) {
                         items(pagingItems.itemCount) { index ->
                             pagingItems[index]?.let { contact ->
-                                ContactItem(contact = contact)
+                                ContactItem(
+                                    contact = contact,
+                                    onClick = { onContactClick(contact) }
+                                )
                                 HorizontalDivider(
                                     modifier = Modifier.padding(start = 80.dp),
                                     thickness = 0.5.dp,

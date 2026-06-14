@@ -12,13 +12,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,12 +32,15 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.app.contacts.domain.model.ContactDomain
 import com.app.contacts.ui.components.LocalContacts
 import com.app.contacts.ui.components.RemoteContacts
 import com.app.contacts.ui.util.PermissionStatus
+import com.app.ui.components.ContactActionBottomSheet
 import com.app.ui.components.ConvoTabs
 import com.app.ui.theme.ConvoTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactsScreen(
     viewModel: ContactsViewModel = hiltViewModel()
@@ -48,6 +52,9 @@ fun ContactsScreen(
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val localListState = rememberLazyListState()
     val remoteListState = rememberLazyListState()
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedContact by remember { mutableStateOf<ContactDomain?>(null) }
 
     val checkPermissionStatus = {
         val permission = Manifest.permission.READ_CONTACTS
@@ -134,15 +141,31 @@ fun ContactsScreen(
                     }
                     context.startActivity(intent)
                 },
+                onContactClick = { contact ->
+                    selectedContact = contact
+                    showBottomSheet = true
+                },
                 listState = localListState
             )
         } else {
             RemoteContacts(
                 modifier = Modifier.padding(padding),
                 uiState = uiState.remoteContactsUiState,
+                onContactClick = { contact ->
+                    selectedContact = contact
+                    showBottomSheet = true
+                },
                 listState = remoteListState
             )
         }
+    }
+
+    if (showBottomSheet && selectedContact != null) {
+        ContactActionBottomSheet(
+            phoneNumber = selectedContact?.phoneNumber,
+            email = selectedContact?.email,
+            onDismissRequest = { showBottomSheet = false }
+        )
     }
 }
 
