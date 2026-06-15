@@ -44,9 +44,6 @@ dependencies {
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
 
-    // Gson
-    implementation(libs.gson)
-
     // ViewModel & Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -62,9 +59,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.hilt.work)
-    implementation(libs.androidx.work.runtime.ktx)
-    ksp(libs.androidx.hilt.compiler)
 
 
     // Paging 3
