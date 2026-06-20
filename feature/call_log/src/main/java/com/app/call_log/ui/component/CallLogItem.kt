@@ -108,8 +108,10 @@ fun CallLogItem(
                     else -> "Mobile"
                 }
                 
+                val durationText = if (callLog.type != CallLog.Calls.MISSED_TYPE) " • ${callLog.formattedDuration}" else ""
+                
                 Text(
-                    text = "$typeText • ${formatTime(callLog.date)}",
+                    text = "$typeText • ${formatTime(callLog.date)}$durationText",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (callLog.type == CallLog.Calls.MISSED_TYPE) MaterialTheme.colorScheme.error 
                             else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)

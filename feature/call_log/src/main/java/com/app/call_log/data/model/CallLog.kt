@@ -24,7 +24,13 @@ fun CallLog.toDomain(): CallLogDomain {
 }
 
 private fun formatDuration(duration: Long): String {
-    val minutes = duration / 60
+    val hours = duration / 3600
+    val minutes = (duration % 3600) / 60
     val seconds = duration % 60
-    return if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
+    
+    return buildString {
+        if (hours > 0) append("${hours}h ")
+        if (minutes > 0 || hours > 0) append("${minutes}m ")
+        append("${seconds}s")
+    }.trim()
 }
