@@ -10,7 +10,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.app.contacts.data.model.Contact
 import com.app.contacts.domain.contract.ContactsRepo
-import com.app.contacts.paging.remote_contacts.RemoteContactsPagingSource
+import com.app.contacts.data.paging.remote_contacts.RemoteContactsPagingSource
 import com.app.network.api.ContactsService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

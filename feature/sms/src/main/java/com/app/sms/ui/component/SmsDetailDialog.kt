@@ -72,11 +72,6 @@ fun SmsDetailDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
-        },
-        dismissButton = {
             TextButton(
                 content = {
                     Text("Reply")
@@ -86,6 +81,11 @@ fun SmsDetailDialog(
                     onDismiss()
                 }
             )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
         }
     )
 }

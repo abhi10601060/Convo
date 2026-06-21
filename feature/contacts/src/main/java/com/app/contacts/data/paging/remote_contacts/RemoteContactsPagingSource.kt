@@ -1,4 +1,4 @@
-package com.app.contacts.paging.remote_contacts
+package com.app.contacts.data.paging.remote_contacts
 
 import android.net.Uri
 import androidx.paging.PagingSource

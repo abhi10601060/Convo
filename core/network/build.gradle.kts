@@ -23,6 +23,18 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures{
+        buildConfig = true
+    }
+
+    buildTypes {
+        getByName("debug") {
+            buildConfigField("String", "BASE_URL", "\"https://dummyjson.com/\"")
+        }
+        getByName("release") {
+            buildConfigField("String", "BASE_URL", "\"https://dummyjson.com/\"")
+        }
+    }
 }
 
 dependencies {

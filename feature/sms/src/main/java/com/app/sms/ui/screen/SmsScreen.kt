@@ -12,7 +12,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.*
@@ -21,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -29,7 +29,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.app.sms.domain.model.SmsDomain
+import com.app.sms.ui.component.EmptySmsView
 import com.app.sms.ui.component.SmsDetailDialog
 import com.app.sms.ui.component.SmsItem
 import com.app.ui.util.PermissionStatus
@@ -43,7 +46,7 @@ fun SmsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
-    
+
     var selectedSms by remember { mutableStateOf<SmsDomain?>(null) }
 
     val checkPermissionStatus = {
@@ -56,13 +59,21 @@ fun SmsScreen(
             allGranted -> {
                 viewModel.changePermissionStatus(PermissionStatus.GRANTED)
             }
-            activity != null && permissions.any { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) } -> {
+
+            activity != null && permissions.any {
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    it
+                )
+            } -> {
                 viewModel.changePermissionStatus(PermissionStatus.SHOW_RATIONALE)
             }
+
             viewModel.hasAskedBeforeSmsPermission && activity != null -> {
                 // If we've asked before and some are not granted and no rationale, they might have checked "Don't ask again"
                 viewModel.changePermissionStatus(PermissionStatus.SHOW_SETTINGS)
             }
+
             else -> {
                 viewModel.changePermissionStatus(PermissionStatus.SHOW_FIRST_TIME)
             }
@@ -98,56 +109,149 @@ fun SmsScreen(
         if (uiState.permissionStatus == PermissionStatus.GRANTED) {
             viewModel.loadSmsMessages()
         } else if (uiState.permissionStatus == PermissionStatus.SHOW_FIRST_TIME) {
-            launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
+            launcher.launch(
+                arrayOf(
+                    Manifest.permission.READ_SMS,
+                    Manifest.permission.READ_CONTACTS
+                )
+            )
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (uiState.permissionStatus) {
             PermissionStatus.GRANTED -> {
-                PullToRefreshBox(
-                    isRefreshing = uiState.smsUiState is SMSUiState.Loading,
-                    onRefresh = {
-                        viewModel.loadSmsMessages()
-                    },
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    when (val state = uiState.smsUiState) {
-                        is SMSUiState.Loading -> {
-                        }
-                        is SMSUiState.Success -> {
-                            LazyColumn {
-                                items(state.smsList) { sms ->
-                                    SmsItem(sms = sms, onClick = { selectedSms = sms })
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        thickness = 0.5.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant
-                                    )
+                when (val state = uiState.smsUiState) {
+                    is SMSUiState.Success -> {
+                        val smsItems = state.smsPagingData.collectAsLazyPagingItems()
+                        PullToRefreshBox(
+                            isRefreshing = smsItems.loadState.refresh is LoadState.Loading,
+                            onRefresh = {
+                                smsItems.refresh()
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(smsItems.itemCount) { index ->
+                                        smsItems[index]?.let { sms ->
+                                            SmsItem(sms = sms, onClick = { selectedSms = sms })
+                                            HorizontalDivider(
+                                                modifier = Modifier.padding(horizontal = 16.dp),
+                                                thickness = 0.5.dp,
+                                                color = MaterialTheme.colorScheme.outlineVariant
+                                            )
+                                        }
+                                    }
+
+                                    smsItems.apply {
+                                        when {
+                                            loadState.append is LoadState.Loading -> {
+                                                item {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(16.dp),
+                                                        contentAlignment = Alignment.Center,
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
+
+                                            loadState.refresh is LoadState.Error -> {
+                                                val e =
+                                                    smsItems.loadState.refresh as LoadState.Error
+                                                item {
+                                                    Column(
+                                                        modifier = Modifier.fillParentMaxSize(),
+                                                        verticalArrangement = Arrangement.Center,
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                    ) {
+                                                        Text(
+                                                            text = e.error.localizedMessage
+                                                                ?: "Something went wrong",
+                                                            color = MaterialTheme.colorScheme.error,
+                                                            modifier = Modifier.padding(16.dp),
+                                                            textAlign = TextAlign.Center,
+                                                        )
+                                                        Button(onClick = { retry() }) {
+                                                            Text("Retry")
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            loadState.append is LoadState.Error -> {
+                                                val e = smsItems.loadState.append as LoadState.Error
+                                                item {
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(16.dp),
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                    ) {
+                                                        Text(
+                                                            text = e.error.localizedMessage
+                                                                ?: "Something went wrong",
+                                                            color = MaterialTheme.colorScheme.error,
+                                                            textAlign = TextAlign.Center,
+                                                        )
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        Button(onClick = { retry() }) {
+                                                            Text("Retry")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (smsItems.loadState.refresh is LoadState.NotLoading && smsItems.itemCount == 0) {
+                                    EmptySmsView()
                                 }
                             }
                         }
-                        is SMSUiState.Error -> {
-                            Text(
-                                text = state.message,
-                                modifier = Modifier.align(Alignment.Center),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        else -> {}
                     }
+
+                    is SMSUiState.Error -> {
+                        Text(
+                            text = state.message,
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    is SMSUiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    else -> {}
                 }
             }
+
             PermissionStatus.SHOW_RATIONALE, PermissionStatus.SHOW_FIRST_TIME -> {
                 PermissionDeniedContent(
                     icon = Icons.Default.Sms,
                     message = "SMS and Contacts permissions are required to show your messages with names.",
                     buttonText = "Grant Permissions",
                     onButtonClick = {
-                        launcher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS))
+                        launcher.launch(
+                            arrayOf(
+                                Manifest.permission.READ_SMS,
+                                Manifest.permission.READ_CONTACTS
+                            )
+                        )
                     }
                 )
             }
+
             PermissionStatus.SHOW_SETTINGS -> {
                 PermissionDeniedContent(
                     icon = Icons.Default.Sms,
@@ -161,6 +265,7 @@ fun SmsScreen(
                     }
                 )
             }
+
             else -> {}
         }
     }
